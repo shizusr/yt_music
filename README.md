@@ -1,5 +1,7 @@
 # YouTube to MP3 Downloader
 
+![App Screenshot](https://github.com/shizusr/yt_music/blob/master/image.png?raw=true)
+
 ## Prerequisites 📋
 
 - [Flutter SDK](https://flutter.dev/docs/get-started/install) (v3.8.1+)

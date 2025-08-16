@@ -1,5 +1,6 @@
 # YouTube to MP3 Downloader
 
+![App Screenshot](https://github.com/shizusr/yt_music/blob/master/image.png?raw=true)
 
 ## Prerequisites 📋
 

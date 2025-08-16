@@ -1,16 +1,59 @@
-# yt_music
+🚀 Getting Started
+Prerequisites
 
-A new Flutter project.
+    Flutter SDK (v3.8.1 or higher)
 
-## Getting Started
+    yt-dlp (Latest version recommended)
 
-This project is a starting point for a Flutter application.
+    FFmpeg (For audio conversion)
 
-A few resources to get you started if this is your first Flutter project:
+Installation
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+    Clone the repository:
+    bash
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+git clone https://github.com/shizusr/yt_music.git
+cd yt-mp3-downloader
+
+Install dependencies:
+bash
+
+flutter pub get
+
+Run the application:
+bash
+
+    flutter run
+
+🛠️ Usage
+
+    Launch the application
+
+    Paste YouTube URLs (one per line) in the input field
+
+    Click "Download all as MP3"
+
+    Monitor progress in the log window
+
+    Find your MP3 files in ~/Music/ directory by default
+
+Example Input:
+text
+
+https://www.youtube.com/watch?v=dQw4w9WgXcQ
+https://www.youtube.com/watch?v=9bZkp7q19f0
+https://www.youtube.com/watch?v=JGwWNGJdvx8
+
+⚙️ Configuration
+
+Modify the output directory or format by editing the Process.run command in main.dart:
+dart
+
+final result = await Process.run('yt-dlp', [
+'--extract-audio',
+'--audio-format',
+'mp3',
+'-o',
+'~/Music/%(title)s.%(ext)s', // Modify this path as needed
+url,
+]);

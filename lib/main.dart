@@ -9,41 +9,142 @@ void main() {
   runApp(YTDownloaderApp());
 }
 
-class YTDownloaderApp extends StatelessWidget {
+class YTDownloaderApp extends StatefulWidget {
+  @override
+  _YTDownloaderAppState createState() => _YTDownloaderAppState();
+}
+
+class _YTDownloaderAppState extends State<YTDownloaderApp> {
+  bool _isDarkMode = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemePreference();
+  }
+
+  Future<void> _loadThemePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isDarkMode = prefs.getBool('isDarkMode') ?? true;
+    });
+  }
+
+  Future<void> _toggleTheme(bool isDark) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', isDark);
+    setState(() {
+      _isDarkMode = isDark;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'YouTube to MP3 Downloader',
-      theme: ThemeData.dark().copyWith(
-        colorScheme: ColorScheme.dark(
-          primary: Colors.blueAccent,
-          secondary: Colors.cyanAccent,
-          surface: Color(0xFF121212),
-          background: Color(0xFF1E1E1E),
+      theme: _isDarkMode ? _buildDarkTheme() : _buildLightTheme(),
+      home: DownloaderScreen(
+        isDarkMode: _isDarkMode,
+        onThemeChanged: _toggleTheme,
+      ),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+
+  ThemeData _buildDarkTheme() {
+    return ThemeData.dark().copyWith(
+      colorScheme: ColorScheme.dark(
+        primary: Color(0xFF6AE8FF),
+        secondary: Color(0xFFA78BFA),
+        surface: Color(0xFF1E293B),
+        background: Color(0xFF0F172A),
+      ),
+      cardTheme: CardThemeData(
+        elevation: 2,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        cardTheme: CardThemeData(
-          elevation: 2,
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+        color: Color(0xFF1E293B),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Color(0xFF334155)),
         ),
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.blueGrey),
-          ),
-          filled: true,
-          fillColor: Colors.grey[900],
+        filled: true,
+        fillColor: Color(0xFF1E293B),
+        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Color(0xFF0F172A),
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
       ),
-      home: DownloaderScreen(),
-      debugShowCheckedModeBanner: false,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: Color(0xFF6AE8FF),
+        foregroundColor: Color(0xFF0F172A),
+      ),
+    );
+  }
+
+  ThemeData _buildLightTheme() {
+    return ThemeData.light().copyWith(
+      colorScheme: ColorScheme.light(
+        primary: Color(0xFF3B82F6),
+        secondary: Color(0xFF8B5CF6),
+        surface: Colors.white,
+        background: Color(0xFFF8FAFC),
+      ),
+      cardTheme: CardThemeData(
+        elevation: 2,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        color: Colors.white,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Color(0xFF3B82F6),
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: Color(0xFF3B82F6),
+        foregroundColor: Colors.white,
+      ),
     );
   }
 }
 
 class DownloaderScreen extends StatefulWidget {
+  final bool isDarkMode;
+  final Function(bool) onThemeChanged;
+
+  const DownloaderScreen({
+    required this.isDarkMode,
+    required this.onThemeChanged,
+  });
+
   @override
   _DownloaderScreenState createState() => _DownloaderScreenState();
 }
@@ -117,6 +218,7 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
       context: context,
       builder: (context) => DirectoryPickerDialog(
         initialDirectory: _downloadDirectory,
+        isDarkMode: widget.isDarkMode,
       ),
     );
 
@@ -222,10 +324,18 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('YouTube ➤ MP3 Bulk Downloader'),
         actions: [
+          IconButton(
+            icon: Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () => widget.onThemeChanged(!widget.isDarkMode),
+            tooltip: 'Toggle theme',
+          ),
           IconButton(
             icon: Icon(Icons.music_note),
             onPressed: () {
@@ -254,7 +364,7 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
                   children: [
-                    Icon(Icons.folder, color: Colors.blueAccent),
+                    Icon(Icons.folder, color: theme.colorScheme.primary),
                     SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -264,7 +374,7 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
                             'Download Location',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey,
+                              color: theme.textTheme.bodySmall?.color,
                             ),
                           ),
                           Text(
@@ -293,7 +403,10 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
             // URL input field
             Text(
               'YouTube URLs (one per line)',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.textTheme.bodySmall?.color,
+              ),
             ),
             SizedBox(height: 4),
             Expanded(
@@ -333,7 +446,7 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
@@ -389,24 +502,28 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
                     itemBuilder: (context, index) {
                       final file = _musicFiles[index];
                       return ListTile(
-                        leading: Icon(Icons.music_note,
-                            color: _currentlyPlayingIndex == index
-                                ? Colors.blueAccent
-                                : Colors.white),
+                        leading: Icon(
+                          Icons.music_note,
+                          color: _currentlyPlayingIndex == index
+                              ? theme.colorScheme.primary
+                              : theme.iconTheme.color,
+                        ),
                         title: Text(
                           path.basenameWithoutExtension(file.path),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                              color: _currentlyPlayingIndex == index
-                                  ? Colors.blueAccent
-                                  : Colors.white),
+                            color: _currentlyPlayingIndex == index
+                                ? theme.colorScheme.primary
+                                : theme.textTheme.bodyLarge?.color,
+                          ),
                         ),
                         subtitle: Text(
                           '${(File(file.path).lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
                           style: TextStyle(fontSize: 12),
                         ),
                         trailing: IconButton(
-                          icon: _currentlyPlayingIndex == index && _playerState == PlayerState.playing
+                          icon: _currentlyPlayingIndex == index &&
+                              _playerState == PlayerState.playing
                               ? Icon(Icons.pause)
                               : Icon(Icons.play_arrow),
                           onPressed: () => _playMusic(index),
@@ -489,8 +606,12 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
 
 class DirectoryPickerDialog extends StatefulWidget {
   final String initialDirectory;
+  final bool isDarkMode;
 
-  const DirectoryPickerDialog({required this.initialDirectory});
+  const DirectoryPickerDialog({
+    required this.initialDirectory,
+    required this.isDarkMode,
+  });
 
   @override
   _DirectoryPickerDialogState createState() => _DirectoryPickerDialogState();
@@ -584,8 +705,15 @@ class _DirectoryPickerDialogState extends State<DirectoryPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = widget.isDarkMode;
+
     return AlertDialog(
-      title: Text('Select Download Directory'),
+      backgroundColor: isDark ? Color(0xFF1E293B) : Colors.white,
+      title: Text(
+        'Select Download Directory',
+        style: TextStyle(color: isDark ? Colors.white : Colors.black),
+      ),
       content: Container(
         width: double.maxFinite,
         height: 400,
@@ -594,17 +722,17 @@ class _DirectoryPickerDialogState extends State<DirectoryPickerDialog> {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.arrow_back),
+                  icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
                   onPressed: _canGoBack ? _goBack : null,
                   tooltip: 'Back',
                 ),
                 IconButton(
-                  icon: Icon(Icons.arrow_forward),
+                  icon: Icon(Icons.arrow_forward, color: isDark ? Colors.white : Colors.black),
                   onPressed: _canGoForward ? _goForward : null,
                   tooltip: 'Forward',
                 ),
                 IconButton(
-                  icon: Icon(Icons.arrow_upward),
+                  icon: Icon(Icons.arrow_upward, color: isDark ? Colors.white : Colors.black),
                   onPressed: _goUp,
                   tooltip: 'Up',
                 ),
@@ -614,16 +742,25 @@ class _DirectoryPickerDialogState extends State<DirectoryPickerDialog> {
                     child: Text(
                       _currentPath,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 14),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-            Divider(),
+            Divider(color: isDark ? Colors.white24 : Colors.black12),
             Expanded(
               child: _isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isDark ? Colors.blueAccent : Colors.blue,
+                  ),
+                ),
+              )
                   : ListView.builder(
                 itemCount: _contents.length,
                 itemBuilder: (context, index) {
@@ -632,9 +769,16 @@ class _DirectoryPickerDialogState extends State<DirectoryPickerDialog> {
                   return ListTile(
                     leading: Icon(
                       isDirectory ? Icons.folder : Icons.insert_drive_file,
-                      color: isDirectory ? Colors.amber : null,
+                      color: isDirectory
+                          ? Colors.amber
+                          : (isDark ? Colors.white70 : Colors.black54),
                     ),
-                    title: Text(path.basename(entity.path)),
+                    title: Text(
+                      path.basename(entity.path),
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
                     onTap: isDirectory
                         ? () => _navigateTo(entity.path)
                         : null,
@@ -648,11 +792,17 @@ class _DirectoryPickerDialogState extends State<DirectoryPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'),
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: isDark ? Colors.white : Colors.black),
+          ),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, _currentPath),
-          child: Text('Select'),
+          child: Text(
+            'Select',
+            style: TextStyle(color: isDark ? Colors.blueAccent : Colors.blue),
+          ),
         ),
       ],
     );

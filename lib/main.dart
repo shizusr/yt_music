@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   runApp(YTDownloaderApp());
@@ -13,8 +14,31 @@ class YTDownloaderApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'YouTube to MP3 Downloader',
-      theme: ThemeData.dark(),
+      theme: ThemeData.dark().copyWith(
+        colorScheme: ColorScheme.dark(
+          primary: Colors.blueAccent,
+          secondary: Colors.cyanAccent,
+          surface: Color(0xFF121212),
+          background: Color(0xFF1E1E1E),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 2,
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.blueGrey),
+          ),
+          filled: true,
+          fillColor: Colors.grey[900],
+        ),
+      ),
       home: DownloaderScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -31,11 +55,28 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
   String _downloadDirectory = '';
   List<FileSystemEntity> _musicFiles = [];
   final ScrollController _scrollController = ScrollController();
+  bool _showMusicPanel = false;
+  bool _showLogsPanel = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  int? _currentlyPlayingIndex;
+  PlayerState _playerState = PlayerState.stopped;
 
   @override
   void initState() {
     super.initState();
     _loadSavedDirectory();
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      setState(() {
+        _playerState = state;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    _urlsController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSavedDirectory() async {
@@ -47,13 +88,11 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
         _downloadDirectory = savedDir;
       });
     } else {
-      // Default to Documents directory if no saved directory exists
       Directory dir = await getApplicationDocumentsDirectory();
       setState(() {
         _downloadDirectory = dir.path;
       });
     }
-    _refreshMusicFiles();
   }
 
   Future<void> _saveDirectory(String path) async {
@@ -152,124 +191,295 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
     _log('🏁 All downloads complete!');
   }
 
+  Future<void> _playMusic(int index) async {
+    if (_currentlyPlayingIndex == index && _playerState == PlayerState.playing) {
+      await _audioPlayer.pause();
+      setState(() {
+        _playerState = PlayerState.paused;
+      });
+      return;
+    }
+
+    final file = _musicFiles[index];
+    try {
+      await _audioPlayer.play(DeviceFileSource(file.path));
+      setState(() {
+        _currentlyPlayingIndex = index;
+        _playerState = PlayerState.playing;
+      });
+    } catch (e) {
+      _log('❌ Playback error: ${e.toString()}');
+    }
+  }
+
+  Future<void> _stopMusic() async {
+    await _audioPlayer.stop();
+    setState(() {
+      _currentlyPlayingIndex = null;
+      _playerState = PlayerState.stopped;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('YouTube ➤ MP3 Bulk Downloader'),
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor, // Use theme color
-        elevation: 2, // Fixed elevation
-        scrolledUnderElevation: 0, // Disables elevation change on scroll
-      ),      body: Padding(
+        actions: [
+          IconButton(
+            icon: Icon(Icons.music_note),
+            onPressed: () {
+              _refreshMusicFiles();
+              setState(() => _showMusicPanel = !_showMusicPanel);
+            },
+            tooltip: 'Toggle music panel',
+          ),
+          IconButton(
+            icon: Icon(Icons.history),
+            onPressed: () {
+              setState(() => _showLogsPanel = !_showLogsPanel);
+            },
+            tooltip: 'Toggle logs panel',
+          ),
+        ],
+      ),
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Download to: $_downloadDirectory',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 14),
-                  ),
+            // Download location card
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.folder, color: Colors.blueAccent),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Download Location',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          Text(
+                            _downloadDirectory,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: _isDownloading ? null : _changeDownloadDirectory,
+                      tooltip: 'Change directory',
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.folder),
-                  onPressed: _isDownloading ? null : _changeDownloadDirectory,
-                  tooltip: 'Change download directory',
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            TextField(
-              controller: _urlsController,
-              decoration: InputDecoration(
-                labelText: 'Paste YouTube links (one per line)',
-                border: OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.multiline,
-              maxLines: 6,
             ),
             SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _isDownloading ? null : _downloadAll,
-              icon: Icon(Icons.download),
-              label: Text('Download all as MP3'),
+
+            // URL input field
+            Text(
+              'YouTube URLs (one per line)',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 4),
             Expanded(
               flex: 2,
-              child: Card(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Music Files in Directory',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Divider(height: 1),
-                    Expanded(
-                      child: _musicFiles.isEmpty
-                          ? Center(child: Text('No MP3 files found'))
-                          : ListView.builder(
-                        controller: _scrollController,
-                        itemCount: _musicFiles.length,
-                        itemBuilder: (context, index) {
-                          final file = _musicFiles[index];
-                          return Container(
-                            color: Theme.of(context).cardColor, // Fixed background color
-                            child: ListTile(
-                              leading: Icon(Icons.music_note),
-                              title: Text(
-                                path.basename(file.path),
-                                style: TextStyle(color: Colors.white), // Fixed text color
-                              ),
-                              trailing: Text(
-                                '${(File(file.path).lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+              child: TextField(
+                controller: _urlsController,
+                decoration: InputDecoration(
+                  hintText: 'Paste YouTube links here...',
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 12,
+                  ),
+                ),
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+            SizedBox(height: 12),
+
+            // Compact download button
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton.icon(
+                onPressed: _isDownloading ? null : _downloadAll,
+                icon: _isDownloading
+                    ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+                    : Icon(Icons.download, size: 20),
+                label: Text(_isDownloading ? 'Downloading...' : 'Download'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ),
             SizedBox(height: 16),
-            Expanded(
-              flex: 1,
-              child: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Download Logs',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+
+            // Music files panel
+            if (_showMusicPanel) ...[
+              Row(
+                children: [
+                  Text(
+                    'Your Music Files',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                    Divider(height: 1),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _logs.length,
-                        itemBuilder: (context, index) {
-                          return Text(_logs[index]);
-                        },
+                  ),
+                  if (_currentlyPlayingIndex != null) ...[
+                    SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      onPressed: _stopMusic,
+                      icon: Icon(Icons.stop, size: 18),
+                      label: Text('Stop'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        backgroundColor: Colors.redAccent,
                       ),
                     ),
                   ],
+                ],
+              ),
+              SizedBox(height: 8),
+              Expanded(
+                flex: 3,
+                child: Card(
+                  child: _musicFiles.isEmpty
+                      ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.music_off, size: 48, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'No MP3 files found',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  )
+                      : ListView.builder(
+                    controller: _scrollController,
+                    itemCount: _musicFiles.length,
+                    itemBuilder: (context, index) {
+                      final file = _musicFiles[index];
+                      return ListTile(
+                        leading: Icon(Icons.music_note,
+                            color: _currentlyPlayingIndex == index
+                                ? Colors.blueAccent
+                                : Colors.white),
+                        title: Text(
+                          path.basenameWithoutExtension(file.path),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: _currentlyPlayingIndex == index
+                                  ? Colors.blueAccent
+                                  : Colors.white),
+                        ),
+                        subtitle: Text(
+                          '${(File(file.path).lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        trailing: IconButton(
+                          icon: _currentlyPlayingIndex == index && _playerState == PlayerState.playing
+                              ? Icon(Icons.pause)
+                              : Icon(Icons.play_arrow),
+                          onPressed: () => _playMusic(index),
+                        ),
+                        onTap: () => _playMusic(index),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
+              SizedBox(height: 8),
+            ],
+
+            // Floating logs panel
+            if (_showLogsPanel) ...[
+              Expanded(
+                child: Card(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Download Logs',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.close),
+                              onPressed: () => setState(() => _showLogsPanel = false),
+                              tooltip: 'Hide logs',
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(height: 1),
+                      Expanded(
+                        child: _logs.isEmpty
+                            ? Center(
+                          child: Text(
+                            'No logs available',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        )
+                            : ListView.builder(
+                          itemCount: _logs.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              child: Text(
+                                _logs[index],
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -296,16 +506,14 @@ class _DirectoryPickerDialogState extends State<DirectoryPickerDialog> {
   @override
   void initState() {
     super.initState();
-    _currentPath = widget.initialDirectory; // Initialize with the provided directory
+    _currentPath = widget.initialDirectory;
     _initializeDirectory();
   }
 
   Future<void> _initializeDirectory() async {
     setState(() => _isLoading = true);
     try {
-      // Verify the initial directory exists
       if (!await Directory(_currentPath).exists()) {
-        // Fallback to root directory if initial directory doesn't exist
         _currentPath = Platform.isWindows ? 'C:\\' : '/';
       }
 
@@ -341,7 +549,6 @@ class _DirectoryPickerDialogState extends State<DirectoryPickerDialog> {
   void _navigateTo(String newPath) {
     setState(() {
       _currentPath = newPath;
-      // Update history
       if (_currentHistoryIndex < _pathHistory.length - 1) {
         _pathHistory = _pathHistory.sublist(0, _currentHistoryIndex + 1);
       }
@@ -384,7 +591,6 @@ class _DirectoryPickerDialogState extends State<DirectoryPickerDialog> {
         height: 400,
         child: Column(
           children: [
-            // Navigation buttons
             Row(
               children: [
                 IconButton(

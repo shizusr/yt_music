@@ -42,7 +42,7 @@ class _YTDownloaderAppState extends State<YTDownloaderApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'YouTube to MP3 Downloader',
-      theme: _isDarkMode ? _buildDarkTheme() : _buildLightTheme(),
+      theme: _isDarkMode ? _buildGloomyPurpleTheme() : _buildModernLightTheme(),
       home: DownloaderScreen(
         isDarkMode: _isDarkMode,
         onThemeChanged: _toggleTheme,
@@ -86,10 +86,6 @@ class _YTDownloaderAppState extends State<YTDownloaderApp> {
           color: Colors.white,
         ),
       ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: Color(0xFF6AE8FF),
-        foregroundColor: Color(0xFF0F172A),
-      ),
     );
   }
 
@@ -128,9 +124,289 @@ class _YTDownloaderAppState extends State<YTDownloaderApp> {
           color: Colors.white,
         ),
       ),
+    );
+  }
+
+  ThemeData _buildGloomyPurpleTheme() {
+    return ThemeData.dark().copyWith(
+      colorScheme: ColorScheme.dark(
+        primary: Color(0xFFBB86FC),  // Light purple
+        primaryContainer: Color(0xFF3700B3),  // Deep purple
+        secondary: Color(0xFF03DAC6),  // Teal accent
+        secondaryContainer: Color(0xFF018786),  // Darker teal
+        surface: Color(0xFF121212),  // Dark surface
+        background: Color(0xFF121212),  // Dark background
+        error: Color(0xFFCF6679),  // Error color
+        onPrimary: Colors.black,
+        onSecondary: Colors.black,
+        onSurface: Colors.white,
+        onBackground: Colors.white,
+        onError: Colors.black,
+      ),
+      scaffoldBackgroundColor: Color(0xFF121212),
+      cardTheme: CardThemeData(
+        elevation: 2,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        color: Color(0xFF1E1E1E),  // Slightly lighter than background
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Color(0xFF1E1E1E),
+        elevation: 2,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFFBB86FC),  // Purple text
+        ),
+        iconTheme: IconThemeData(
+          color: Color(0xFFBB86FC),  // Purple icons
+        ),
+      ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: Color(0xFF3B82F6),
+        backgroundColor: Color(0xFFBB86FC),  // Purple FAB
+        foregroundColor: Colors.black,
+      ),
+      textTheme: TextTheme(
+        displayLarge: TextStyle(color: Colors.white),
+        displayMedium: TextStyle(color: Colors.white),
+        displaySmall: TextStyle(color: Colors.white),
+        headlineMedium: TextStyle(color: Colors.white),
+        headlineSmall: TextStyle(color: Colors.white),
+        titleLarge: TextStyle(color: Colors.white),
+        titleMedium: TextStyle(color: Color(0xFFBB86FC)),  // Purple titles
+        titleSmall: TextStyle(color: Colors.white70),
+        bodyLarge: TextStyle(color: Colors.white),
+        bodyMedium: TextStyle(color: Colors.white70),
+        bodySmall: TextStyle(color: Colors.white54),
+        labelLarge: TextStyle(color: Colors.black),  // For buttons
+        labelSmall: TextStyle(color: Colors.white70),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Color(0xFF1E1E1E),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Color(0xFFBB86FC)),  // Purple border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Color(0xFFBB86FC).withOpacity(0.5)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Color(0xFFBB86FC), width: 2),
+        ),
+        labelStyle: TextStyle(color: Color(0xFFBB86FC)),  // Purple labels
+        hintStyle: TextStyle(color: Colors.white54),
+      ),
+      buttonTheme: ButtonThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFFBB86FC),  // Purple button
+          foregroundColor: Colors.black,
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: Color(0xFFBB86FC),  // Purple text
+        ),
+      ),
+      iconTheme: IconThemeData(
+        color: Color(0xFFBB86FC),  // Purple icons
+      ),
+      dividerTheme: DividerThemeData(
+        color: Color(0xFFBB86FC).withOpacity(0.2),  // Subtle purple divider
+        thickness: 1,
+        space: 1,
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: Color(0xFFBB86FC),  // Purple icons
+        textColor: Colors.white,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return Color(0xFFBB86FC);  // Purple when on
+          }
+          return Colors.grey;
+        }),
+        trackColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return Color(0xFFBB86FC).withOpacity(0.5);  // Purple track when on
+          }
+          return Colors.grey.withOpacity(0.5);
+        }),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: Color(0xFFBB86FC),  // Purple loading indicators
+      ),
+    );
+  }
+
+  ThemeData _buildModernLightTheme() {
+    return ThemeData.light().copyWith(
+      colorScheme: ColorScheme.light(
+        primary: Color(0xFF7C4DFF),  // Deep purple
+        primaryContainer: Color(0xFF651FFF),  // Darker purple
+        secondary: Color(0xFF00B0FF),  // Bright blue accent
+        secondaryContainer: Color(0xFF0081CB),  // Darker blue
+        surface: Colors.white,
+        background: Color(0xFFF5F5F5),  // Very light grey background
+        error: Color(0xFFE53935),  // Red for errors
+        onPrimary: Colors.white,
+        onSecondary: Colors.black,
+        onSurface: Colors.black,
+        onBackground: Colors.black,
+        onError: Colors.white,
+      ),
+      scaffoldBackgroundColor: Color(0xFFF5F5F5),
+      cardTheme: CardThemeData(
+        elevation: 1,
+        margin: EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        color: Colors.white,
+        surfaceTintColor: Colors.white,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+        iconTheme: IconThemeData(
+          color: Color(0xFF7C4DFF),  // Purple icons
+        ),
+        actionsIconTheme: IconThemeData(
+          color: Color(0xFF7C4DFF),  // Purple action icons
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: Color(0xFF7C4DFF),  // Purple FAB
         foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      textTheme: TextTheme(
+        displayLarge: TextStyle(color: Colors.black87, fontWeight: FontWeight.w300),
+        displayMedium: TextStyle(color: Colors.black87),
+        displaySmall: TextStyle(color: Colors.black87),
+        headlineMedium: TextStyle(color: Colors.black87),
+        headlineSmall: TextStyle(color: Colors.black87),
+        titleLarge: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500),
+        titleMedium: TextStyle(color: Color(0xFF7C4DFF)),  // Purple titles
+        titleSmall: TextStyle(color: Colors.black54),
+        bodyLarge: TextStyle(color: Colors.black87),
+        bodyMedium: TextStyle(color: Colors.black87),
+        bodySmall: TextStyle(color: Colors.black54),
+        labelLarge: TextStyle(color: Colors.white),  // For buttons
+        labelSmall: TextStyle(color: Colors.black54),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Color(0xFF7C4DFF), width: 2),
+        ),
+        labelStyle: TextStyle(color: Colors.black54),
+        hintStyle: TextStyle(color: Colors.grey.shade400),
+      ),
+      buttonTheme: ButtonThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFF7C4DFF),  // Purple button
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+          shadowColor: Colors.transparent,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: Color(0xFF7C4DFF),  // Purple text
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Color(0xFF7C4DFF),  // Purple outline
+          side: BorderSide(color: Color(0xFF7C4DFF)),
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      iconTheme: IconThemeData(
+        color: Color(0xFF7C4DFF),  // Purple icons
+      ),
+      dividerTheme: DividerThemeData(
+        color: Colors.grey.shade200,  // Very light grey divider
+        thickness: 1,
+        space: 1,
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: Color(0xFF7C4DFF),  // Purple icons
+        textColor: Colors.black87,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return Color(0xFF7C4DFF);  // Purple when on
+          }
+          return Colors.grey.shade400;
+        }),
+        trackColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return Color(0xFF7C4DFF).withOpacity(0.5);  // Purple track when on
+          }
+          return Colors.grey.shade400.withOpacity(0.5);
+        }),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: Color(0xFF7C4DFF),  // Purple loading indicators
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.grey.shade100,
+        selectedColor: Color(0xFF7C4DFF),
+        secondarySelectedColor: Color(0xFF7C4DFF),
+        labelStyle: TextStyle(color: Colors.black87),
+        secondaryLabelStyle: TextStyle(color: Colors.white),
+        brightness: Brightness.light,
+        padding: EdgeInsets.all(4),
+        shape: StadiumBorder(),
       ),
     );
   }
@@ -165,7 +441,7 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
   @override
   void initState() {
     super.initState();
-    _loadSavedDirectory();
+    _loadSavedPreferences();
     _audioPlayer.onPlayerStateChanged.listen((state) {
       setState(() {
         _playerState = state;
@@ -173,32 +449,37 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
     });
   }
 
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    _urlsController.dispose();
-    super.dispose();
+  Future<void> _loadSavedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _downloadDirectory = prefs.getString('downloadDirectory') ??
+          (Platform.isWindows ? 'C:\\Music' : '${Directory.current.path}/Music');
+      _showMusicPanel = prefs.getBool('showMusicPanel') ?? false;
+      _showLogsPanel = prefs.getBool('showLogsPanel') ?? false;
+    });
+
+    if (!await Directory(_downloadDirectory).exists()) {
+      await Directory(_downloadDirectory).create(recursive: true);
+    }
+
+    _refreshMusicFiles();
   }
 
-  Future<void> _loadSavedDirectory() async {
+  Future<void> _savePreference(String key, dynamic value) async {
     final prefs = await SharedPreferences.getInstance();
-    final savedDir = prefs.getString('downloadDirectory');
-
-    if (savedDir != null && await Directory(savedDir).exists()) {
-      setState(() {
-        _downloadDirectory = savedDir;
-      });
-    } else {
-      Directory dir = await getApplicationDocumentsDirectory();
-      setState(() {
-        _downloadDirectory = dir.path;
-      });
+    if (value is bool) {
+      await prefs.setBool(key, value);
+    } else if (value is String) {
+      await prefs.setString(key, value);
     }
   }
 
   Future<void> _saveDirectory(String path) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('downloadDirectory', path);
+    setState(() {
+      _downloadDirectory = path;
+    });
+    await _savePreference('downloadDirectory', path);
+    _refreshMusicFiles();
   }
 
   Future<void> _refreshMusicFiles() async {
@@ -223,11 +504,7 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
     );
 
     if (newDir != null && newDir != _downloadDirectory) {
-      setState(() {
-        _downloadDirectory = newDir;
-      });
       await _saveDirectory(newDir);
-      _refreshMusicFiles();
     }
   }
 
@@ -322,6 +599,155 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
     });
   }
 
+  void _toggleMusicPanel() async {
+    final newValue = !_showMusicPanel;
+    setState(() {
+      _showMusicPanel = newValue;
+    });
+    if (newValue) {
+      _refreshMusicFiles();
+    }
+    await _savePreference('showMusicPanel', newValue);
+  }
+
+  void _toggleLogsPanel() async {
+    final newValue = !_showLogsPanel;
+    setState(() {
+      _showLogsPanel = newValue;
+    });
+    await _savePreference('showLogsPanel', newValue);
+  }
+
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Preferences'),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // General Section
+                  Text(
+                    'General',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+
+                  // Theme Selection
+                  Text('App Theme', style: TextStyle(fontWeight: FontWeight.w500)),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      ChoiceChip(
+                        label: Text('Light'),
+                        selected: !widget.isDarkMode,
+                        onSelected: (selected) {
+                          if (selected) widget.onThemeChanged(false);
+                        },
+                      ),
+                      SizedBox(width: 8),
+                      ChoiceChip(
+                        label: Text('Dark'),
+                        selected: widget.isDarkMode,
+                        onSelected: (selected) {
+                          if (selected) widget.onThemeChanged(true);
+                        },
+                      ),
+                      SizedBox(width: 8),
+                      ChoiceChip(
+                        label: Text('System'),
+                        selected: false,
+                        onSelected: (selected) {
+                          // You would implement system theme detection here
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+
+                  // Download Settings
+                  Text('Download Settings', style: TextStyle(fontWeight: FontWeight.w500)),
+                  SizedBox(height: 8),
+                  ListTile(
+                    leading: Icon(Icons.folder),
+                    title: Text('Download Directory'),
+                    subtitle: Text(_downloadDirectory),
+                    trailing: IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _changeDownloadDirectory();
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16),
+
+                  // Audio Quality
+                  Text('Audio Quality', style: TextStyle(fontWeight: FontWeight.w500)),
+                  SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: 'high', // Default value
+                    items: [
+                      DropdownMenuItem(value: 'low', child: Text('Low (96kbps)')),
+                      DropdownMenuItem(value: 'medium', child: Text('Medium (128kbps)')),
+                      DropdownMenuItem(value: 'high', child: Text('High (192kbps)')),
+                      DropdownMenuItem(value: 'best', child: Text('Best (320kbps)')),
+                    ],
+                    onChanged: (value) {
+                      // Save quality preference
+                    },
+                  ),
+                  SizedBox(height: 16),
+
+                  // Advanced Settings
+                  Text('Advanced', style: TextStyle(fontWeight: FontWeight.w500)),
+                  SizedBox(height: 8),
+                  SwitchListTile(
+                    title: Text('Show weekly tips'),
+                    value: true,
+                    onChanged: (value) {},
+                  ),
+                  SwitchListTile(
+                    title: Text('Send usage statistics'),
+                    subtitle: Text('Help improve the app by sending anonymous usage data'),
+                    value: true,
+                    onChanged: (value) {},
+                  ),
+                  SwitchListTile(
+                    title: Text('Auto-update check'),
+                    value: true,
+                    onChanged: (value) {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Save all settings
+                Navigator.pop(context);
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -330,276 +756,239 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('YouTube ➤ MP3 Bulk Downloader'),
-        actions: [
-          IconButton(
-            icon: Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
-            onPressed: () => widget.onThemeChanged(!widget.isDarkMode),
-            tooltip: 'Toggle theme',
-          ),
-          IconButton(
-            icon: Icon(Icons.music_note),
-            onPressed: () {
-              _refreshMusicFiles();
-              setState(() => _showMusicPanel = !_showMusicPanel);
-            },
-            tooltip: 'Toggle music panel',
-          ),
-          IconButton(
-            icon: Icon(Icons.history),
-            onPressed: () {
-              setState(() => _showLogsPanel = !_showLogsPanel);
-            },
-            tooltip: 'Toggle logs panel',
-          ),
-        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Download location card
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'YouTube URLs (one per line)',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: theme.textTheme.bodySmall?.color,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _urlsController,
+                    decoration: InputDecoration(
+                      hintText: 'Paste YouTube links here...',
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 12,
+                      ),
+                    ),
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+                SizedBox(height: 12),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.folder, color: theme.colorScheme.primary),
-                    SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Download Location',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: theme.textTheme.bodySmall?.color,
-                            ),
-                          ),
-                          Text(
-                            _downloadDirectory,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: _isDownloading ? null : _changeDownloadDirectory,
-                      tooltip: 'Change directory',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-
-            // URL input field
-            Text(
-              'YouTube URLs (one per line)',
-              style: TextStyle(
-                fontSize: 14,
-                color: theme.textTheme.bodySmall?.color,
-              ),
-            ),
-            SizedBox(height: 4),
-            Expanded(
-              flex: 2,
-              child: TextField(
-                controller: _urlsController,
-                decoration: InputDecoration(
-                  hintText: 'Paste YouTube links here...',
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 12,
-                  ),
-                ),
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
-            SizedBox(height: 12),
-
-            // Compact download button
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton.icon(
-                onPressed: _isDownloading ? null : _downloadAll,
-                icon: _isDownloading
-                    ? SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-                    : Icon(Icons.download, size: 20),
-                label: Text(_isDownloading ? 'Downloading...' : 'Download'),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-
-            // Music files panel
-            if (_showMusicPanel) ...[
-              Row(
-                children: [
-                  Text(
-                    'Your Music Files',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (_currentlyPlayingIndex != null) ...[
-                    SizedBox(width: 16),
-                    ElevatedButton.icon(
-                      onPressed: _stopMusic,
-                      icon: Icon(Icons.stop, size: 18),
-                      label: Text('Stop'),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        backgroundColor: Colors.redAccent,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              SizedBox(height: 8),
-              Expanded(
-                flex: 3,
-                child: Card(
-                  child: _musicFiles.isEmpty
-                      ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.music_off, size: 48, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          'No MP3 files found',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  )
-                      : ListView.builder(
-                    controller: _scrollController,
-                    itemCount: _musicFiles.length,
-                    itemBuilder: (context, index) {
-                      final file = _musicFiles[index];
-                      return ListTile(
-                        leading: Icon(
-                          Icons.music_note,
-                          color: _currentlyPlayingIndex == index
-                              ? theme.colorScheme.primary
-                              : theme.iconTheme.color,
-                        ),
-                        title: Text(
-                          path.basenameWithoutExtension(file.path),
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: _currentlyPlayingIndex == index
-                                ? theme.colorScheme.primary
-                                : theme.textTheme.bodyLarge?.color,
+                      child: ElevatedButton.icon(
+                        onPressed: _toggleMusicPanel,
+                        icon: Icon(Icons.music_note),
+                        label: Text(_showMusicPanel ? 'Hide Music' : 'Show Music'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        subtitle: Text(
-                          '${(File(file.path).lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        trailing: IconButton(
-                          icon: _currentlyPlayingIndex == index &&
-                              _playerState == PlayerState.playing
-                              ? Icon(Icons.pause)
-                              : Icon(Icons.play_arrow),
-                          onPressed: () => _playMusic(index),
-                        ),
-                        onTap: () => _playMusic(index),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              SizedBox(height: 8),
-            ],
-
-            // Floating logs panel
-            if (_showLogsPanel) ...[
-              Expanded(
-                child: Card(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Download Logs',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.close),
-                              onPressed: () => setState(() => _showLogsPanel = false),
-                              tooltip: 'Hide logs',
-                            ),
-                          ],
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _showSettingsDialog,
+                        icon: Icon(Icons.settings),
+                        label: Text('Settings'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
-                      Divider(height: 1),
-                      Expanded(
-                        child: _logs.isEmpty
-                            ? Center(
-                          child: Text(
-                            'No logs available',
-                            style: TextStyle(color: Colors.grey),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _isDownloading ? null : _downloadAll,
+                        icon: _isDownloading
+                            ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
                           ),
                         )
-                            : ListView.builder(
-                          itemCount: _logs.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              child: Text(
-                                _logs[index],
-                                style: TextStyle(fontSize: 12),
-                              ),
-                            );
-                          },
+                            : Icon(Icons.download, size: 20),
+                        label: Text(_isDownloading ? 'Downloading...' : 'Download'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+
+                if (_showMusicPanel) ...[                    Row(
+                    children: [
+                    Text(
+                    'Your Music Files',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (_currentlyPlayingIndex != null) ...[
+                      SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        onPressed: _stopMusic,
+                        icon: Icon(Icons.stop, size: 18),
+                        label: Text('Stop'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          backgroundColor: Colors.redAccent,
                         ),
                       ),
                     ],
+                  ],
+                ),
+                SizedBox(height: 8),
+                Expanded(
+                  flex: 3,
+                  child: Card(
+                    child: _musicFiles.isEmpty
+                        ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.music_off, size: 48, color: Colors.grey),
+                          SizedBox(height: 16),
+                          Text(
+                            'No MP3 files found',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    )
+                        : ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _musicFiles.length,
+                      itemBuilder: (context, index) {
+                        final file = _musicFiles[index];
+                        return ListTile(
+                          leading: Icon(
+                            Icons.music_note,
+                            color: _currentlyPlayingIndex == index
+                                ? theme.colorScheme.primary
+                                : theme.iconTheme.color,
+                          ),
+                          title: Text(
+                            path.basenameWithoutExtension(file.path),
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: _currentlyPlayingIndex == index
+                                  ? theme.colorScheme.primary
+                                  : theme.textTheme.bodyLarge?.color,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${(File(file.path).lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          trailing: IconButton(
+                            icon: _currentlyPlayingIndex == index &&
+                                _playerState == PlayerState.playing
+                                ? Icon(Icons.pause)
+                                : Icon(Icons.play_arrow),
+                            onPressed: () => _playMusic(index),
+                          ),
+                          onTap: () => _playMusic(index),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ],
-        ),
+                SizedBox(height: 8),
+              ],
+
+              if (_showLogsPanel) ...[
+      Expanded(
+      child: Card(
+      child: Column(
+      children: [
+      Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Download Logs',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.close),
+            onPressed: _toggleLogsPanel,
+            tooltip: 'Hide logs',
+          ),
+        ],
       ),
+    ),
+    Divider(height: 1),
+    Expanded(
+    child: _logs.isEmpty
+    ? Center(
+    child: Text(
+    'No logs available',
+    style: TextStyle(color: Colors.grey),
+    ),
+    )
+        : ListView.builder(
+    itemCount: _logs.length,
+    itemBuilder: (context, index) {
+    return Padding(
+    padding: EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 6,
+    ),
+    child: Text(
+    _logs[index],
+    style: TextStyle(fontSize: 12),
+    ),
+    );
+    },
+    ),
+    ),
+    ],
+    ),
+    ),
+    ),
+    ],
+    ],
+    ),
+    ),
     );
   }
 }
@@ -705,7 +1094,6 @@ class _DirectoryPickerDialogState extends State<DirectoryPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isDark = widget.isDarkMode;
 
     return AlertDialog(

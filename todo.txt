@@ -1,1 +1,12 @@
 1. add custom theme.
+2. Progress bar for the current track
+3. Volume – slider in the player
+4. Background play – continues playback when the application is minimized
+5. Sort by date/title/size
+6. Search by track name
+7. Check for duplicates before downloading
+8. "Show in folder" button for each track
+9. Auto-rename - remove "[Official Video]" from titles
+10. Auto-update file list
+11. Hotkeys (Ctrl+V for paste)
+12. Notifications when downloading is complete

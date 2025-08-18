@@ -53,13 +53,6 @@ class _YTDownloaderAppState extends State<YTDownloaderApp> {
 
   ThemeData _buildGloomyPurpleTheme() {
     return ThemeData.dark().copyWith(
-      colorScheme: ColorScheme.dark(
-        primary: Color(0xFFBB86FC),
-        primaryContainer: Color(0xFF3700B3),
-        secondary: Color(0xFF03DAC6),
-        surface: Color(0xFF121212),
-        background: Color(0xFF121212),
-      ),
       scaffoldBackgroundColor: Color(0xFF121212),
       cardTheme: CardThemeData(
         elevation: 2,
@@ -85,7 +78,7 @@ class _YTDownloaderAppState extends State<YTDownloaderApp> {
         backgroundColor: Color(0xFFBB86FC),
         foregroundColor: Colors.black,
       ),
-      textTheme: TextTheme(
+      textTheme: ThemeData.dark().textTheme.copyWith(
         bodyLarge: TextStyle(color: Colors.white),
         bodyMedium: TextStyle(color: Colors.white70),
         titleMedium: TextStyle(color: Color(0xFFBB86FC)),
@@ -103,12 +96,6 @@ class _YTDownloaderAppState extends State<YTDownloaderApp> {
 
   ThemeData _buildModernLightTheme() {
     return ThemeData.light().copyWith(
-      colorScheme: ColorScheme.light(
-        primary: Color(0xFF7C4DFF),
-        secondary: Color(0xFF00B0FF),
-        surface: Colors.white,
-        background: Color(0xFFF5F5F5),
-      ),
       scaffoldBackgroundColor: Color(0xFFF5F5F5),
       cardTheme: CardThemeData(
         elevation: 1,
@@ -130,7 +117,7 @@ class _YTDownloaderAppState extends State<YTDownloaderApp> {
           color: Color(0xFF7C4DFF),
         ),
       ),
-      textTheme: TextTheme(
+      textTheme: ThemeData.light().textTheme.copyWith(
         bodyLarge: TextStyle(color: Colors.black87),
         bodyMedium: TextStyle(color: Colors.black87),
         titleMedium: TextStyle(color: Color(0xFF7C4DFF)),
@@ -326,99 +313,129 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
   Widget _buildPlayerControls() {
     return Column(
       children: [
+        SizedBox(height: 8),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 12),
           child: Column(
             children: [
-              // Объединённая строка с таймлайном и громкостью
               StreamBuilder<Duration>(
                 stream: _audioPlayer.onPositionChanged,
                 builder: (context, snapshot) {
                   final position = snapshot.data ?? Duration.zero;
-                  final duration = _currentDuration ?? Duration(seconds: 1);
+                  final duration = _currentDuration ?? Duration.zero;
+
+                  // Проверяем, что продолжительность больше 0 перед отображением слайдера
+                  if (duration.inSeconds <= 0) {
+                    return SizedBox(); // Возвращаем пустой виджет, если продолжительность неизвестна
+                  }
 
                   return Row(
                     children: [
-                      // Таймлайн (основная часть)
+                      Text(
+                        _formatDuration(position),
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
                       Expanded(
-                        child: Slider(
-                          value: position.inSeconds.toDouble(),
-                          max: duration.inSeconds.toDouble(),
-                          onChangeEnd: (value) {
-                            _audioPlayer.seek(Duration(seconds: value.toInt()));
-                          },
-                          onChanged: (double value) {},
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Slider(
+                            value: position.inSeconds.toDouble().clamp(0.0, duration.inSeconds.toDouble()),
+                            min: 0.0,
+                            max: duration.inSeconds.toDouble(),
+                            onChangeEnd: (value) {
+                              _audioPlayer.seek(Duration(seconds: value.toInt()));
+                            },
+                            onChanged: (double value) {},
+                          ),
                         ),
                       ),
-
-                      // Регулятор громкости
-                      MouseRegion(
-                        onEnter: (_) => setState(() => _showVolumeSlider = true),
-                        onExit: (_) => setState(() => _showVolumeSlider = false),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(
-                                _volume == 0
-                                    ? Icons.volume_off
-                                    : _volume < 0.5
-                                    ? Icons.volume_down
-                                    : Icons.volume_up,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                final newVol = _volume > 0 ? 0.0 : 1.0;
-                                setState(() => _volume = newVol);
-                                _audioPlayer.setVolume(newVol);
-                              },
-                            ),
-                            AnimatedContainer(
-                              width: _showVolumeSlider ? 100 : 0,
-                              duration: Duration(milliseconds: 200),
-                              child: _showVolumeSlider
-                                  ? SizedBox(
-                                width: 100,
-                                child: Slider(
-                                  value: _volume,
-                                  min: 0,
-                                  max: 1,
-                                  onChanged: (value) {
-                                    setState(() => _volume = value);
-                                    _audioPlayer.setVolume(value);
-                                  },
-                                ),
-                              )
-                                  : SizedBox(),
-                            ),
-                          ],
-                        ),
+                      Text(
+                        _formatDuration(duration),
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ],
                   );
                 },
               ),
-
-              // Строка с временем и скоростью воспроизведения
               Padding(
-                padding: EdgeInsets.only(top: 4),
+                padding: EdgeInsets.only(top: 8),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Текущее время
-                    StreamBuilder<Duration>(
-                      stream: _audioPlayer.onPositionChanged,
-                      builder: (context, snapshot) {
-                        final position = snapshot.data ?? Duration.zero;
-                        return Text(
-                          _formatDuration(position),
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        );
+                    IconButton(
+                      icon: Icon(Icons.skip_previous),
+                      onPressed: () {
+                        if (_currentlyPlayingIndex != null && _currentlyPlayingIndex! > 0) {
+                          _playMusic(_currentlyPlayingIndex! - 1);
+                        }
                       },
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _playerState == PlayerState.playing ? Icons.pause : Icons.play_arrow,
+                        size: 32,
+                      ),
+                      onPressed: () {
+                        if (_currentlyPlayingIndex != null) {
+                          _playMusic(_currentlyPlayingIndex!);
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.skip_next),
+                      onPressed: () {
+                        if (_currentlyPlayingIndex != null && _currentlyPlayingIndex! < _musicFiles.length - 1) {
+                          _playMusic(_currentlyPlayingIndex! + 1);
+                        }
+                      },
+                    ),
+                    SizedBox(width: 16),
+                    MouseRegion(
+                      onEnter: (_) => setState(() => _showVolumeSlider = true),
+                      onExit: (_) => setState(() => _showVolumeSlider = false),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              _volume == 0
+                                  ? Icons.volume_off
+                                  : _volume < 0.5
+                                  ? Icons.volume_down
+                                  : Icons.volume_up,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              final newVol = _volume > 0 ? 0.0 : 1.0;
+                              setState(() => _volume = newVol);
+                              _audioPlayer.setVolume(newVol);
+                            },
+                          ),
+                          AnimatedContainer(
+                            width: _showVolumeSlider ? 100 : 0,
+                            duration: Duration(milliseconds: 200),
+                            child: _showVolumeSlider
+                                ? SizedBox(
+                              width: 100,
+                              child: Slider(
+                                value: _volume,
+                                min: 0,
+                                max: 1,
+                                onChanged: (value) {
+                                  setState(() => _volume = value);
+                                  _audioPlayer.setVolume(value);
+                                },
+                              ),
+                            )
+                                : SizedBox(),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
+              SizedBox(height: 8),
             ],
           ),
         ),
@@ -462,45 +479,57 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _urlsController,
-              decoration: InputDecoration(
-                hintText: 'Paste YouTube links here...',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.clear),
-                  onPressed: () => _urlsController.clear(),
-                ),
-              ),
-              maxLines: 5,
-            ),
-            SizedBox(height: 12),
-            Row(
+            // Верхняя часть (форма ввода и кнопки)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _toggleMusicPanel,
-                    icon: Icon(Icons.music_note),
-                    label: Text(_showMusicPanel ? 'Hide Music' : 'Show Music'),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 200),
+                  child: TextField(
+                    controller: _urlsController,
+                    decoration: InputDecoration(
+                      hintText: 'Paste YouTube links here...',
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () => _urlsController.clear(),
+                      ),
+                    ),
+                    maxLines: null,
                   ),
                 ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isDownloading ? null : _downloadAll,
-                    icon: _isDownloading
-                        ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                        : Icon(Icons.download),
-                    label: Text(_isDownloading ? 'Downloading...' : 'Download'),
-                  ),
+                SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _toggleMusicPanel,
+                        icon: Icon(Icons.music_note),
+                        label: Text(_showMusicPanel ? 'Hide Music' : 'Show Music'),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _isDownloading ? null : _downloadAll,
+                        icon: _isDownloading
+                            ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                            : Icon(Icons.download),
+                        label: Text(_isDownloading ? 'Downloading...' : 'Download'),
+                      ),
+                    ),
+                  ],
                 ),
+                SizedBox(height: 16),
               ],
             ),
-            SizedBox(height: 16),
+
+            // Средняя часть (заголовок и плеер)
             if (_showMusicPanel) ...[
               Row(
                 children: [
@@ -517,6 +546,11 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
               ),
               SizedBox(height: 8),
               if (_currentlyPlayingIndex != null) _buildPlayerControls(),
+              SizedBox(height: 8),
+            ],
+
+            // Нижняя часть (список песен) с Expanded
+            if (_showMusicPanel)
               Expanded(
                 child: Card(
                   child: _musicFiles.isEmpty
@@ -525,44 +559,74 @@ class _DownloaderScreenState extends State<DownloaderScreen> {
                     itemCount: _musicFiles.length,
                     itemBuilder: (context, index) {
                       final file = _musicFiles[index];
-                      return ListTile(
-                        leading: Icon(Icons.music_note),
-                        title: Text(path.basenameWithoutExtension(file.path)),
-                        subtitle: Text(
-                            '${(File(file.path).lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.folder_open),
-                              onPressed: () {
-                                if (Platform.isWindows) {
-                                  Process.run('explorer', [file.parent.path]);
-                                } else if (Platform.isLinux) {
-                                  Process.run('xdg-open', [file.parent.path]);
-                                } else if (Platform.isMacOS) {
-                                  Process.run('open', [file.parent.path]);
-                                }
-                              },
-                            ),
-                            IconButton(
-                              icon: _currentlyPlayingIndex == index &&
-                                  _playerState == PlayerState.playing
-                                  ? Icon(Icons.pause)
-                                  : Icon(Icons.play_arrow),
-                              onPressed: () => _playMusic(index),
-                            ),
-                          ],
+                      return GestureDetector(
+                        onTap: () => _playMusic(index),
+                        onSecondaryTap: () {
+                          showContextMenu(context, file);
+                        },
+                        child: ListTile(
+                          leading: Icon(Icons.music_note),
+                          title: Text(path.basenameWithoutExtension(file.path)),
+                          subtitle: Text(
+                            // Corrected file size calculation
+                            '${(File(file.path).lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
+                          ), // Subtitle's Text widget ends here
+                          // Correctly placed trailing property
+                          trailing: IconButton(
+                            icon: Icon(Icons.folder_open),
+                            onPressed: () {
+                              if (Platform.isWindows) {
+                                Process.run('explorer', [file.parent.path]);
+                              } else if (Platform.isLinux) {
+                                Process.run('xdg-open', [file.parent.path]);
+                              } else if (Platform.isMacOS) {
+                                Process.run('open', [file.parent.path]);
+                              }
+                            },
+                          ),
                         ),
                       );
                     },
                   ),
                 ),
               ),
-            ],
           ],
         ),
       ),
+    );
+  }
+
+  void showContextMenu(BuildContext context, FileSystemEntity file) {
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        Offset(0, overlay.size.height),
+        Offset(overlay.size.width, overlay.size.height),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    showMenu(
+      context: context,
+      position: position,
+      items: [
+        PopupMenuItem(
+          child: ListTile(
+            leading: Icon(Icons.folder_open),
+            title: Text('Open containing folder'),
+            onTap: () {
+              Navigator.pop(context);
+              if (Platform.isWindows) {
+                Process.run('explorer', [file.parent.path]);
+              } else if (Platform.isLinux) {
+                Process.run('xdg-open', [file.parent.path]);
+              } else if (Platform.isMacOS) {
+                Process.run('open', [file.parent.path]);
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 
